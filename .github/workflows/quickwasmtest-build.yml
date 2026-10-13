@@ -1,0 +1,45 @@
+name: Sync, test, and publish WordCraft WASM
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_tag:
+        description: Upstream release tag to test (empty selects latest)
+        required: false
+        type: string
+  schedule:
+    - cron: "17 15 * * 1"
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/quickwasmtest-build.yml"
+      - ".github/quickwasmtest/MediaPageTheRepo.sh"
+      - ".github/quickwasmtest/patch-web-ui.py"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mediapager-wordcraft-update
+  cancel-in-progress: false
+
+jobs:
+  test-and-publish:
+    runs-on: ubuntu-latest
+    env:
+      TOOL: wordcraft
+      SOURCE_TAG_INPUT: ${{ inputs.source_tag }}
+      GH_TOKEN: ${{ github.token }}
+      GIT_AUTHOR_NAME: No Bugs Given
+      GIT_AUTHOR_EMAIL: nobugsgiven@gmail.com
+      GIT_COMMITTER_NAME: No Bugs Given
+      GIT_COMMITTER_EMAIL: nobugsgiven@gmail.com
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Build, validate, sync upstream tags, and publish only on success
+        run: bash .github/quickwasmtest/MediaPageTheRepo.sh "$TOOL" "$SOURCE_TAG_INPUT" --publish

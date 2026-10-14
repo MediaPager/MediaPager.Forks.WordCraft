@@ -23,3 +23,8 @@ patch("crates/ui-egui/src/ribbon.rs",
 patch("crates/ui-egui/src/dialogs.rs",
       'ui.hyperlink_to(tl!("Join us on Discord: discord.gg/artcraft"), "https://discord.gg/artcraft");',
       '#[cfg(not(target_arch = "wasm32"))]\n                    ui.hyperlink_to(tl!("Join us on Discord: discord.gg/artcraft"), "https://discord.gg/artcraft");')
+patch("apps/wordcraft-web/src/web.rs",
+      'let mut app = WordApp::new(session, services(inbox.clone(), cc.egui_ctx.clone(), dirty, saves.clone()));',
+      'let mut app = WordApp::new(session, services(inbox.clone(), cc.egui_ctx.clone(), dirty, saves.clone()));\n'
+      '                    // MediaPager owns the browser appearance; follow its prefers-color-scheme.\n'
+      '                    app.ui.theme = wordcraft_ui_egui::theme::Appearance::System;')
